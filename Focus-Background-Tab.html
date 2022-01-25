@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>This page should have only one instance</title>
+		<script type="application/javascript">
+			/*<![CDATA[*/
+			const currentUrl = location.href;
+			const currentTimestamp = Date.now();
+			const previousTimestamp = +localStorage.getItem(currentUrl);
+			const focusKey = "$$focus$$";
+			const interval = navigator.userAgent.indexOf("Firefox") > -1 ? 0 : 500;
+			const closeThisWindow = () => {
+				localStorage.setItem(focusKey, currentUrl);
+				setTimeout(() => {
+					window.close();
+				}, interval);
+			};
+			const continueWorking = () => {
+				localStorage.setItem(currentUrl, currentTimestamp);
+				window.addEventListener("storage", event => {
+					if(event.key === focusKey && event.newValue === currentUrl) {
+						const tempWin = window.open("", Date.now().toString(), "");
+						const scriptElement = tempWin.document.createElement("script");
+						scriptElement.innerHTML = `window.opener.focus(); window.close();`;
+						tempWin.document.body.appendChild(scriptElement);
+					}
+				});
+				window.addEventListener("beforeunload", event => {
+					if(currentTimestamp > previousTimestamp) {
+						localStorage.removeItem(currentUrl);
+					}
+				});
+			};
+			/*]]>*/
+		</script>
+	</head>
+	<body>
+		<div id="info-bar" style="display: none; text-align: center; padding: 10px;">
+			<p>This URL is already open in another browser tab/window.</p>
+			<p>
+				<button onclick="closeThisWindow()">Close this tab</button>
+			</p>
+		</div>
+		<script type="application/javascript">
+			/*<![CDATA[*/
+			if(previousTimestamp) {
+				window.stop();
+				localStorage.setItem(focusKey, Date.now());
+				document.getElementById("info-bar")?.style.setProperty("display", "block");
+			} else {
+				continueWorking();
+			}
+			/*]]>*/
+		</script>
+		<div id="page-content">
+			<h1>This is a heading</h1>
+			<p>This is a pagragraph.</p>
+		</div>
+	</body>
+</html>
