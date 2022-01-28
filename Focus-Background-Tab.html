@@ -11,40 +11,45 @@
 			const currentTimestamp = Date.now();
 			const previousTimestamp = +localStorage.getItem(currentUrl);
 			const focusKey = "$$focus$$";
-			const interval = navigator.userAgent.indexOf("Firefox") > -1 ? 0 : 500;
-			if(!previousTimestamp) {
+			const isFirefox = navigator.userAgent.indexOf("Firefox") > -1;
+			if (!previousTimestamp) {
 				localStorage.setItem(currentUrl, currentTimestamp);
 				window.addEventListener("storage", event => {
-					if(event.key === focusKey && event.newValue === currentUrl) {
+					if (event.key === focusKey && event.newValue === currentUrl) {
 						const tempWin = window.open("", Date.now().toString(), "");
 						const scriptElement = tempWin.document.createElement("script");
 						scriptElement.innerHTML = `window.opener.focus(); window.close();`;
 						tempWin.document.body.appendChild(scriptElement);
+						if (!isFirefox) {
+							setTimeout(() => {
+								alert("You can continue working in this tab.");
+							});
+						}
 					}
 				});
 				window.addEventListener("beforeunload", event => {
 					localStorage.removeItem(currentUrl);
 				});
 			}
-			const closeThisWindow = () => {
+			const closeThisTab = () => {
 				localStorage.setItem(focusKey, currentUrl);
 				setTimeout(() => {
 					window.close();
-				}, interval);
+				}, isFirefox ? 0 : 500);
 			};
 			/*]]>*/
 		</script>
 	</head>
 	<body>
-		<div id="info-bar" style="display: none; text-align: center; padding: 10px;">
-			<p>This URL is already open in another browser tab/window.</p>
+		<div id="info-bar" style="display: none; text-align: center; padding: 10px">
+			<p>This URL is already open in another browser tab.</p>
 			<p>
-				<button onclick="closeThisWindow()">Close this tab</button>
+				<button onclick="closeThisTab()">Close this tab</button>
 			</p>
 		</div>
 		<script type="application/javascript">
 			/*<![CDATA[*/
-			if(previousTimestamp) {
+			if (previousTimestamp) {
 				window.stop();
 				localStorage.setItem(focusKey, Date.now());
 				document.getElementById("info-bar")?.style.setProperty("display", "block");
