@@ -12,13 +12,7 @@
 			const previousTimestamp = +localStorage.getItem(currentUrl);
 			const focusKey = "$$focus$$";
 			const interval = navigator.userAgent.indexOf("Firefox") > -1 ? 0 : 500;
-			const closeThisWindow = () => {
-				localStorage.setItem(focusKey, currentUrl);
-				setTimeout(() => {
-					window.close();
-				}, interval);
-			};
-			const continueWorking = () => {
+			if(!previousTimestamp) {
 				localStorage.setItem(currentUrl, currentTimestamp);
 				window.addEventListener("storage", event => {
 					if(event.key === focusKey && event.newValue === currentUrl) {
@@ -33,6 +27,12 @@
 						localStorage.removeItem(currentUrl);
 					}
 				});
+			}
+			const closeThisWindow = () => {
+				localStorage.setItem(focusKey, currentUrl);
+				setTimeout(() => {
+					window.close();
+				}, interval);
 			};
 			/*]]>*/
 		</script>
@@ -50,8 +50,6 @@
 				window.stop();
 				localStorage.setItem(focusKey, Date.now());
 				document.getElementById("info-bar")?.style.setProperty("display", "block");
-			} else {
-				continueWorking();
 			}
 			/*]]>*/
 		</script>
