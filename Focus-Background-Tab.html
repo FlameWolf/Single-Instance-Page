@@ -23,9 +23,7 @@
 					}
 				});
 				window.addEventListener("beforeunload", event => {
-					if(currentTimestamp > previousTimestamp) {
-						localStorage.removeItem(currentUrl);
-					}
+					localStorage.removeItem(currentUrl);
 				});
 			}
 			const closeThisWindow = () => {
